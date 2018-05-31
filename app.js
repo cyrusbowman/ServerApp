@@ -26,18 +26,22 @@ app.get('/', (req, res) => {
 /**Inventory Endpoint*/
 app.get('/inventory', (req, res) => {
   //Checking array
-  if(checkDatabase() === false){
-    //Sending response
-    res.send("The inventory is empty!");
-  }else{
-    //Getting database
-    knex.select().from('inventory').then(
-      //Getting rows
-      (rows) => {
+  return checkDatabase().then((result) => {
+    if (result === false){
+      //Sending response
+      res.send("The inventory is empty!");
+    } else {
+      //Getting database rows
+      /*
+        Kyle,
+        Must return the knex promise here so function doesn't return before getting
+        the rows from the database.
+      */
+      return knex.select().from('inventory').then((rows) => {
         res.send(rows);
-      }
-    );
-  }
+      });
+    }
+  });
 });
 
 /**Inventory Post Endpoint*/
@@ -65,21 +69,17 @@ app.listen(3000, () => console.log("Listening on port 3000!"));
 
 /**checkDatabase Function*/
 checkDatabase = () => {
-  //Declaring fields
-  var array = [];
-
   //Getting database
-  knex.select().from('inventory').then(
-    //Getting rows
-    (rows) => {
-      //Checking array
-      if(rows.length === 0){
-        //Returning false
-        return false;
-      }else{
-        //Returning true
-        return true;
-      }
+  /*
+    Kyle, all knex methods return promises, so in order to
+  */
+  return knex.select().from('inventory').then((rows) => {
+    if (rows.length === 0) {
+      //Returning false
+      return false;
+    } else {
+      //Returning true
+      return true;
     }
-  );
+  });
 }
